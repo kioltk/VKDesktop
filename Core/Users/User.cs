@@ -1,20 +1,33 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VKDesktop.Core.Messages;
 
 namespace VKDesktop.Core.Users
 {
-    public class User
+    public class User : INotifyPropertyChanged
     {
         [JsonProperty("online")]
         public int _online
         {
             set
             {
-                online = (value == 1 ? true : false);
+                Online = (value == 1 ? true : false);
+                OnPropertyChanged("Online");
+                OnPropertyChanged("Seen");
+            }
+        }
+        [JsonProperty("online_mobile")]
+        public int _online_mobile
+        {
+            set
+            {
+                OnlineMobile = (value == 1 ? true : false);
+                OnPropertyChanged("OnlineMobile");
             }
         }
 
@@ -27,10 +40,11 @@ namespace VKDesktop.Core.Users
         {
             get
             {
-                return last_name + " " + first_name;
+                return last_name + " " + FirstName;
             }
         }
-        public string first_name
+        [JsonProperty("first_name")]
+        public string FirstName
         {
             get;
             set;
@@ -50,13 +64,62 @@ namespace VKDesktop.Core.Users
             get;
             set;
         }
-        [JsonIgnore]
-        public bool online
+        
+        public Sex sex
         {
             get;
             set;
         }
-        public int last_seen
+        public LastSeen last_seen
+        {
+            get;
+            set;
+        }
+
+        [JsonIgnore]
+        public bool OnlineMobile
+        {
+            get;
+            set;
+        }
+        [JsonIgnore]
+        public bool Online
+        {
+            get;
+            set;
+        }
+        public string Seen
+        {
+            get
+            {
+                if(!Online)
+                    return (IsWoman ? "Была" : "Был" ) + " тут " + Helpers.Time.FromEpoch(last_seen.time) + (last_seen.platform!=7 ? " с мобильного ":"");
+                return "";
+            }
+        }
+        public bool IsWoman
+        {
+            get
+            {
+                return (sex == Sex.Woman ? true : false);
+            }
+        }
+
+        public void ShowOnline(bool mobile)
+        {
+            _online = 1;
+            _online_mobile = (mobile ? 1 : 0);
+            last_seen = null;
+        }
+        public void ShowOffline()
+        {
+            last_seen = new LastSeen()
+            {
+                time = Helpers.Time.EpochNow,
+                platform = ( OnlineMobile ? 1 : 7)
+            };
+        }
+        public Dialog Dialog
         {
             get;
             set;
@@ -64,6 +127,37 @@ namespace VKDesktop.Core.Users
 
         public User()
         {
+        }
+
+        public class LastSeen
+        {
+
+            public int time
+            {
+                get;
+                set;
+            }
+            public int platform
+            {
+                get;
+                set;
+            }
+            
+        }
+        public enum Sex{
+            None = 0,
+            Woman = 1,
+            Man = 2
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string arg)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(arg));
+            }
         }
 
     }

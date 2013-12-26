@@ -65,6 +65,14 @@ namespace VKDesktop.Api
             Response<int> a = JsonConvert.DeserializeObject<Response<int>>(responseData);
             return a.response;
         }
+        public async static Task<int> MarkAsRead(int user_id)
+        {
+            var loadingTask = GetLoaderTask("messages.markAsRead", "user_id=" + user_id);
+            string responseData = await loadingTask;
+
+            Response<int> a = JsonConvert.DeserializeObject<Response<int>>(responseData);
+            return a.response;
+        }
         public async static Task<List<Message>> GetMessages(int user_id,int offset, string fields)
         {
 

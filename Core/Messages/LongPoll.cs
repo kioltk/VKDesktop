@@ -73,7 +73,7 @@ namespace VKDesktop.Core.Messages
         private static Task<string> RequestServerTask()
         {
 
-            string url = String.Format("http://{0}?act=a_check&key={1}&ts={2}&wait=25&mode=96 ", server, key, ts);
+            string url = String.Format("http://{0}?act=a_check&key={1}&ts={2}&wait=25&mode=96", server, key, ts);
 
             WebClient client = new WebClient();
             client.Encoding = Encoding.UTF8;
@@ -118,13 +118,55 @@ namespace VKDesktop.Core.Messages
             {
                 switch (Convert.ToInt32(update[0]))
                 {
-                       
+                    case 0:
+                        //0,$message_id,0 -- удаление сообщения с указанным local_id
+                        break;
+                    case 1:
+                        //1,$message_id,$flags -- замена флагов сообщения (FLAGS:=$flags)
+                        break;
+                    case 2:
+                        //2,$message_id,$mask[,$user_id] -- установка флагов сообщения (FLAGS|=$mask)
+                        break;
+                    case 3:
+                        {
+                            //3,$message_id,$mask[,$user_id] -- сброс флагов сообщения (FLAGS&=~$mask) -- приходит 1 в маске, если прочитано
+                            int message_id = Convert.ToInt32(update[1]);
+                            int[] mask = Converter.Flags(Convert.ToInt32(update[2]));
+                            if (mask.Contains(1))
+                                Memory.Read(message_id);
+                        }
+                        break;
                     case 4:
-
+                        //4,$message_id,$flags,$from_id,$timestamp,$subject,$text,$attachments -- добавление нового сообщения
                         var m = Converter.Message(update);
                         Memory.NewMessage(m);
                         break;
-                        
+                    case 8:
+                        {
+                            int user_id = -Convert.ToInt32(update[1]);
+                            bool mobile = (Convert.ToInt32(update[2]) != 7);
+                            Memory.ShowOnline(user_id, mobile);
+                        }
+                        //8,-$user_id,$extra-- друг $user_id стал онлайн, $extra не равен 0, если в mode был передан флаг 64, в младшем байте (остаток от деления на 256) числа $extra лежит идентификатор платформы (таблица ниже)
+                        break;
+                    case 9:
+                        {
+                            int user_id = -Convert.ToInt32(update[1]);
+
+                            Memory.ShowOffline(user_id);
+                        }
+                        //9,-$user_id,$flags -- друг $user_id стал оффлайн ($flags равен 0, если пользователь покинул сайт (например, нажал выход) и 1, если оффлайн по таймауту (например, статус away))
+                        break;
+                    case 61:
+                        {
+                            int user_id = Convert.ToInt32(update[1]);
+                            Memory.ShowTypping(user_id);
+                        }
+                        //61,$user_id,$flags -- пользователь $user_id начал набирать текст в диалоге. событие должно приходить раз в ~5 секунд при постоянном наборе текста. $flags = 1
+                        break;
+                    case 62:
+                        //62,$user_id,$chat_id -- пользователь $user_id начал набирать текст в беседе $chat_id.
+                        break;
                 }
             }
 
@@ -150,8 +192,8 @@ namespace VKDesktop.Core.Messages
                 m.id = Convert.ToInt32(array[1]);
                 
                 m.user_id = Convert.ToInt32(array[3]);
-                m.date = Convert.ToInt32(array[4]);
-                m.body = Convert.ToString(array[6]);
+                m.Date = Convert.ToInt32(array[4]);
+                m.Body = Convert.ToString(array[6]);
 
 
 
@@ -162,10 +204,10 @@ namespace VKDesktop.Core.Messages
                     switch (flag)
                     {
                         case 1:
-                            m.unread = true;
+                            m.Unread = true;
                             break;
                         case 2:
-                            m.mine = true;
+                            m.Mine = true;
                             break;
                         case 8:
                             //imprtant

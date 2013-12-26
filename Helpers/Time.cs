@@ -18,5 +18,29 @@ namespace VKDesktop.Helpers
                 return (int) span.TotalSeconds;
             }
         }
+
+        public static string FromEpoch(int epoch)
+        {
+            var epochStart = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            var epochConverted = epochStart.AddSeconds(epoch);
+            var now = DateTime.UtcNow;
+
+            string fullTime = "";
+
+            string time = epochConverted.ToShortTimeString();
+            int daysAgo = (now.Day - epochConverted.Day);
+            if (daysAgo > 0)
+            {
+                if (daysAgo == 1)
+                    fullTime += "вчера ";
+                else
+                {
+                    fullTime += epochConverted.ToShortDateString() + " ";
+                }
+            }
+            fullTime += time;
+
+            return fullTime;
+        }
     }
 }

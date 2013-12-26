@@ -9,26 +9,14 @@ using VKDesktop.Core.Users;
 using System.Net;
 using System.Windows.Controls;
 using VKDesktop.Helpers;
-using System.ComponentModel; 
+using System.ComponentModel;
+using System.Windows; 
 namespace VKDesktop.Core.Messages
 {
     public class Dialog : INotifyPropertyChanged
     {
-        public Message Last
-        {
-            get
-            {
-                return messages.Last();
-            }
-        }
+        
         ObservableCollection<Message> messages;
-        public ObservableCollection<Message> Messages
-        {
-            get
-            {
-                return messages;
-            }
-        }
         User user;
         public User User
         {
@@ -37,14 +25,40 @@ namespace VKDesktop.Core.Messages
                 return user;
             }
         }
+        public Message Last
+        {
+            get
+            {
+                return messages.Last();
+            }
+        }
+        public ObservableCollection<Message> Messages
+        {
+            get
+            {
+                return messages;
+            }
+        }
+        public bool HasUnread
+        {
+            get
+            {
+                return (messages.First(x => x.Unread) != null);
+            }
+        }
+        public bool MarkingAsRead
+        {
+            get;
+            set;
+        }
         public Dialog(int user_id)
         {
             user = Memory.GetUser(user_id);
+            user.Dialog = this;
             messages = new ObservableCollection<Message>(Memory.GetMesages(user_id));
         }
 
-
-        public async void LoadMore()
+        public async Task LoadMore()
         {
 
             //but.Content = "Берём таск";
@@ -60,33 +74,61 @@ namespace VKDesktop.Core.Messages
             //but.Content = "Таск ответил";
             
         }
-
-
-
+        public async Task MarkAsRead()
+        {
+            MarkingAsRead = true;
+            Task<int> getMarkAsReadTask = Api.Request.MarkAsRead(user.id);
+            bool isMarked = (await getMarkAsReadTask == 1 ? true : false);
+            MarkingAsRead = false;
+        }
+        
+        public void ShowTypping()
+        {
+            if (IsOpened)
+                Window.ShowTypping();
+        }
+        public void SendTypping()
+        {
+            // по таймеру
+            // отправлять писалку
+            // https://vk.com/dev/messages.setActivity
+        }
         public void NewMessage(Message message)
         {   
             messages.Add(message);
             OnPropertyChanged("Last");
+            ScrollDown();
+            
         }
         public async void SendMessage(string messageText)
         {
             Message m = new Message()
             {
-                mine = true,
-                body = messageText,
-                sending = true,
+                Mine = true,
+                Body = messageText,
+                Sending = true,
                 read_state = 0,
                 user_id = user.id,
-                date = Time.EpochNow
+                Date = Time.EpochNow
             };
             Memory.messages.Add(m);
             messages.Add(m);
-            Task<int> sendMessageTask = Api.Request.SendMessage(user.id,messageText);
+            ScrollDown();
+            OnPropertyChanged("Last");
+            Task<int> sendMessageTask = Api.Request.SendMessage(user.id, messageText);
             int mid = await sendMessageTask;
-            if (mid!=0)
+            if (mid != 0)
             {
                 m.id = mid;
-                m.sending = false;
+                m.Sending = false;
+            }
+
+        }
+        public void ScrollDown()
+        {
+            if (IsOpened)
+            {
+                Window.DialogsList.ScrollIntoView(Last);
             }
         }
 
@@ -102,7 +144,32 @@ namespace VKDesktop.Core.Messages
 
         public bool IsFocused
         {
-            get; set;
+            get
+            {
+                if (IsOpened)
+                    return Window.IsActive;
+                return false;
+            }
+        }
+        public bool IsOpened 
+        {
+            get
+            {
+                return (Window == null ? false : true);
+            } 
+        }
+
+        public DialogWindow Window
+        {
+            get;
+            set;
+        }
+
+        public void Open()
+        {
+            Show.DialogWindow(this);
+            
         }
     }
+
 }

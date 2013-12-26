@@ -10,6 +10,9 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Resources;
 using System.Windows;
+using Hardcodet.Wpf.TaskbarNotification;
+using VKDesktop.Models;
+using System.Windows.Controls.Primitives;
 
 namespace VKDesktop.Helpers
 {
@@ -18,6 +21,15 @@ namespace VKDesktop.Helpers
         public static void NewMessage(Message message)
         {
             PlaySound(NotificationSound.Message);
+        }
+
+        public static void ShowMessagePopup(Message message) 
+        {
+
+            MessagePopup balloon = new MessagePopup();
+
+            //show balloon and close it after 4 seconds
+            Tray.ShowCustomBalloon(balloon, PopupAnimation.Slide, null);
         }
         public static void PlaySound(NotificationSound sound)
         {
@@ -31,18 +43,13 @@ namespace VKDesktop.Helpers
             waveOutDevice.Play();
 
         }
-        private static WaveStream CreateInputStream(Stream fileName)
-        {
-            WaveChannel32 inputStream;
-            WaveStream mp3Reader = new Mp3FileReader(fileName);
-            inputStream = new WaveChannel32(mp3Reader);
-            var volumeStream = inputStream;
-            return volumeStream;
-        }
+
         public enum NotificationSound
         {
             Message,
             Other
         }
+
+        public static TaskbarIcon Tray { get; set; }
     }
 }

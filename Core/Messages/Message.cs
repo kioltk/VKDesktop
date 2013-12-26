@@ -5,11 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.ComponentModel;
+using VKDesktop.Core.Users;
 namespace VKDesktop.Core.Messages
 {
     public class Message : INotifyPropertyChanged
     {
-
+        [JsonProperty("out")]
+        public int _out
+        {
+            set
+            {
+                Mine = (value == 1 ? true : false);
+            }
+        }
+        private int _id;
+        private bool unread;
         public int read_state
         {
             set
@@ -17,21 +27,12 @@ namespace VKDesktop.Core.Messages
                 unread = (value == 0 ? true : false);
             }
         }
-        [JsonProperty("out")]
-        public int _out
-        {
-            set
-            {
-                mine = (value == 1 ? true : false);
-            }
-        }
-        private bool _sending;
-        public bool sending
+        
+        public bool Sending
         {
             get;
             set;
         }
-        private int _id;
         public int id
         {
             get
@@ -41,15 +42,16 @@ namespace VKDesktop.Core.Messages
             set
             {
                 _id = value;
-                if (sending)
+                if (Sending)
                 {
-                    sending = false;
+                    Sending = false;
                     OnPropertyChanged("sending");
                 }
 
             }
         }
-        public int date
+        [JsonProperty("date")]
+        public int Date
         {
             get;
             set;
@@ -59,17 +61,25 @@ namespace VKDesktop.Core.Messages
             get;
             set;
         }
-        public bool unread
+        public bool Unread
+        {
+            get
+            {
+                return unread;
+            }
+            set
+            {
+                unread = value;
+                OnPropertyChanged("Unread");
+            }
+        }
+        public bool Mine
         {
             get;
             set;
         }
-        public bool mine
-        {
-            get;
-            set;
-        }
-        public string body
+        [JsonProperty("body")]
+        public string Body
         {
             get;
             set;
@@ -77,6 +87,22 @@ namespace VKDesktop.Core.Messages
         public Message()
         {
         }
+
+        public User User
+        {
+            get
+            {
+                return Memory.GetUser(user_id);
+            }
+        }
+        public User Owner
+        {
+            get
+            {
+                return (Mine ? Account.CurrentUser : User);
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string arg)
         {

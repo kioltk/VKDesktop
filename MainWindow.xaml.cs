@@ -33,18 +33,7 @@ namespace VKDesktop
                 return Account.CurrentUser;
             }
         }
-        public MainWindow()
-        {
-            InitializeComponent();
-            DataContext = this;
-            Loaded += OnLoaded;
-        }
-        protected override void OnInitialized(EventArgs e)
-        {
-            base.OnInitialized(e);
 
-            
-        }
         ObservableCollection<Dialog> dialogs = new ObservableCollection<Dialog>();
         public ObservableCollection<Dialog> getDialogs
         {
@@ -53,62 +42,44 @@ namespace VKDesktop
                 return Memory.dialogs;
             }
         }
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            DataContext = this;
+            Loaded += OnLoaded;
+        
+            Closed += DialogClosed;
+            
+        }
+
+        public void DialogClosed(object sender, EventArgs e)
+        {
+            Memory.MainWindow = null;// = false;
+        }
+        
+
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            AuthorisationDialog auth = new AuthorisationDialog();
-            auth.Owner = this;
-            do
-            {
-                LoginState.Text = "Проходит авторизация...";
-            }
-            while (auth.ShowDialog().Value);
-            if (string.IsNullOrEmpty(Access.access_token))
-            {
-                LoginState.Text = "Авторизация неудачна(";
-            }
-            else
-            {
-                LoginState.Text = "Подключение...";
-            }
-            LoadDialogs();
+
             
             DialogsList.MouseDoubleClick += DialogSelected;
+
         }
+
         private async void LoadDialogs()
         {
 
-            LoginState.Text = "Загрузка...";
-
-            User user = await Api.Request.GetUser();
-            Account.CurrentUser = user;
-
-            List<Message> messagesList = await Api.Request.GetDialogs();
-            messagesList.RemoveAll(x => x.user_id < 0);
-            Memory.messages.AddRange(messagesList);
-
-            int[] userIds = messagesList.Select(x => x.user_id).ToArray();
-            List<User> usersList = await Api.Request.GetUsers(userIds, "photo_50");
-            Memory.users.AddRange(usersList);
-
-            foreach (Message message in messagesList)
-            {
-                Memory.dialogs.Add(new Dialog(message.user_id));
-            }
-
-            
-            Loading.Visibility = Visibility.Collapsed;
-            LongPoll.Start();
-
             LoginState.Text = currentUser.Name;
         }
+        
         private void DialogSelected(object sender, MouseButtonEventArgs e)
         {
             Dialog dialog = (Dialog) ((ListView)sender).SelectedItem;
-            DialogWindow dialogWindow = new DialogWindow();
-            dialogWindow.CurrentDialog = dialog;
-            dialogWindow.Show();
-        }
 
+            dialog.Open();
+
+        }
 
         private void OnlineBoxLoaded(object sender, RoutedEventArgs e)
         {
@@ -128,7 +99,6 @@ namespace VKDesktop
             comboBox.SelectedIndex = 0;
 
         }
-
         private void OnlineChanged(object sender, SelectionChangedEventArgs e)
         {
             var comboBox = sender as ComboBox;
@@ -137,10 +107,12 @@ namespace VKDesktop
             int selected = comboBox.SelectedIndex;
             if (selected == 0)
             {
+                Core.Memory.State = "В сети";
                 Core.Account.SetOnline();
             }
             else
             {
+                Core.Memory.State = "Не в сети";
                 Core.Account.SetOffline();
             }
         }

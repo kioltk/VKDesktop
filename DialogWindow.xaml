@@ -2,13 +2,23 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Icon="/Resources/icons/message.ico"
+        xmlns:converters="clr-namespace:VKDesktop.Models.Converters"
         Title="DialogWindow" Height="650" MinWidth="400" Width="300">
+    <Window.Resources>
+        <converters:DateConverter x:Key="dateConverter"/>
+        <converters:VisibilityConverter x:Key="visibilityConverter"/>
+        <converters:UnreadMessageColorConverter x:Key="unreadMessageColorConverter"/>
+        
+    </Window.Resources>
+    
     <Grid >
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="15"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
         <Grid Grid.Row="0" DataContext="{Binding User}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="35"/>
@@ -34,17 +44,42 @@
                 <Button Grid.Column="1">Отправить</Button>
             </Grid>
         </Grid>
-        <ListView Grid.Row="1" Name="DialogsList"  ItemsSource="{Binding Messages}">
-            <ListBox.ItemTemplate>
+        <ListView Grid.Row="1" Name="DialogsList" ItemsSource="{Binding Messages}" BorderThickness="0" HorizontalContentAlignment="Center">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected"
+    					 Value="True">
+                            <Setter Property="Background"
+    						Value="{x:Null}" />
+                            <Setter Property="BorderBrush"
+    						Value="{x:Null}" />
+                        </Trigger>
+                    </Style.Triggers>
+                    <Style.Setters>
+                        <Setter Property="Margin" Value="0"/>
+                    </Style.Setters>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Width="340" MaxWidth="400" Margin="5,0,5,0">
-                        <TextBlock Text="{Binding body}"/>
-                        <TextBlock Margin="10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Text="{Binding date}"/>
-                        <ProgressBar Height="2" Margin="2" VerticalAlignment="Bottom" IsIndeterminate="{Binding sending}"/>
+                    <Grid Background="{Binding Unread, Converter={StaticResource unreadMessageColorConverter}}" Width="340">
+                        <Grid Margin="5,4">
+                            <StackPanel>
+                                <TextBlock FontWeight="SemiBold" Margin="8,0,0,0" Foreground="#2B587A" Text="{Binding Path=Owner.FirstName}"/>
+                                <Grid>
+                                    <TextBlock Margin="5,0,10,00" TextWrapping="WrapWithOverflow" Text="{Binding Body}" HorizontalAlignment="Left"/>
+                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="{Binding Date, Converter={StaticResource dateConverter}}"/>
+                                    <ProgressBar BorderBrush="#00ffffff" Foreground="#4e7199" Background="#00ffffff" Height="2" Margin="2" VerticalAlignment="Bottom"  IsIndeterminate="{Binding sending}" Visibility="{Binding Sending, Converter={StaticResource visibilityConverter}}" />
+
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
                     </Grid>
                 </DataTemplate>
-            </ListBox.ItemTemplate>
+            </ListView.ItemTemplate>
         </ListView>
-        <TextBox KeyDown="NewMessageKeyUp" MaxWidth="400" Margin="0,5,0,15" Grid.Row="2" MinHeight="50" MaxHeight="100"></TextBox>
+        <TextBlock Visibility="Collapsed" Name="UserStatus" Grid.Row="2" Margin="15,0,0,0" />
+        <TextBox KeyDown="NewMessageKeyUp" MaxWidth="400" Margin="0,5,0,15" Grid.Row="3" MinHeight="50" MaxHeight="100"></TextBox>
     </Grid>
 </Window>

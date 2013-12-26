@@ -2,7 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Icon="/Resources/icons/favicon.ico"
-        Title="MainWindow" Height="650" MaxWidth="500" MinWidth="500" Width="500">
+        xmlns:local="clr-namespace:VKDesktop.Models.Converters"
+        Title="MainWindow"  Height="650" MaxWidth="400" MinWidth="400"  Width="400">
+    <Window.Resources>
+        <local:DateConverter x:Key="dateConverter"/>
+        <local:OnlineConverter x:Key="onlineConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -14,45 +19,58 @@
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
-            <ComboBox Margin="10,10,0,10" Loaded="OnlineBoxLoaded" Grid.Column="0" SelectionChanged="OnlineChanged"/>
+
+            <ComboBox Foreground="#4e7199" Margin="8,8,0,8" Loaded="OnlineBoxLoaded" Grid.Column="0" SelectionChanged="OnlineChanged"/>
             <TextBlock Margin="10" Grid.Column="1" Name="LoginState"/>
-            <ProgressBar Margin="10,0,10,5" VerticalAlignment="Bottom" Name="Loading" Height="2"  Grid.Row="0" Grid.Column="1" IsIndeterminate="True"/>
+            <ProgressBar BorderBrush="#00ffffff" Foreground="#4e7199" Background="#00ffffff" Margin="10,0,10,5"  VerticalAlignment="Bottom" Name="Loading" Height="4"  Grid.Row="0" Grid.Column="1" IsIndeterminate="True"/>
         
         </Grid>
-        
-        <ListView Grid.Row="1" MaxWidth="475" Margin="5" Name="DialogsList" ItemsSource="{Binding getDialogs}">
+
+        <ListView  Grid.Row="1" MaxWidth="370" Margin="5" Name="DialogsList" ItemsSource="{Binding getDialogs}">
+            
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel MaxWidth="465"  Height="60">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="135"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                    <Grid >
+                        <Border BorderThickness="10">
+                        
+                    
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                    <Canvas Grid.Column="0" Background="Gray" Margin="0" Width="50" Height="50">
+                                        <Canvas.Clip>
+                                            <GeometryGroup>
+                                                <RectangleGeometry RadiusX="4" RadiusY="4" Rect="0,0,50,50" />
+                                            </GeometryGroup>
+                                        </Canvas.Clip>
+                                        <Image Height="50" Width="50" Source="{Binding Path=User.photo_50}"/>
+                                    </Canvas>
+                                    
+                                
                             
-                            <Image Height="50" Grid.Column="0" Width="50" Margin="5"  DataContext="{Binding User}" Source="{Binding photo_50}"/>
+                       
                             
-                            <StackPanel Grid.Column="1" Margin="5" VerticalAlignment="Center">
-                                <Grid   DataContext="{Binding User}">                          
-                                    <Grid.RowDefinitions>                                       
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="*"/>
+                                    
+                                <Grid Grid.Column="1" Width="240" Margin="25,0,0,0" Height="50" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="20"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0" Text="{Binding Name}"/>
-                                    <TextBlock Grid.Row="1" Text="{Binding online}"/>
-                                </Grid>                                
-                            </StackPanel>
-                            
-                            <StackPanel DataContext="{Binding Last}" Margin="5,5,0,5" MaxWidth="230" Grid.Column="2" VerticalAlignment="Center">
-                                <TextBlock  Text="{Binding body}" Margin="0,0,5,0" />
-                                <TextBlock Text="{Binding date}" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
-                            </StackPanel>
-                        </Grid>
-                        
-                    </StackPanel>
+
+                                    <TextBlock Foreground="#45688E" FontWeight="SemiBold" Grid.Row="0" Text="{Binding Path=User.Name}"/>
+                                    <TextBlock  Foreground="#999" Text="{Binding Path=Last.Body}"  Grid.Row="1" />
+
+                                    <TextBlock Foreground="#999"  FontStyle="Italic" Text="{Binding Path=Last.Date, Converter={StaticResource dateConverter}}" Grid.RowSpan="2" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+                                    <TextBlock  Foreground="#45688E"  VerticalAlignment="Top" Grid.RowSpan="2" HorizontalAlignment="Right" Text="{Binding Path=User.Online, Converter={StaticResource onlineConverter}}"/>
+                                </Grid>
+                                
+                            </Grid>
+                        </Border>
+                        <Border VerticalAlignment="Bottom"  BorderBrush="#e4e8ed" BorderThickness="0.5"/>
+                    </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListView>
