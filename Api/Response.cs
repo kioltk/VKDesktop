@@ -18,14 +18,15 @@ namespace VKDesktop.Api
         }
         
     }
-    public class Messages
+    public class ListItems<T>
     {
 
         public int count;
-        public List<Message> items;
-        public Messages()
+        public List<T> items;
+        public ListItems()
         {
         }
     }
+    
     
 }

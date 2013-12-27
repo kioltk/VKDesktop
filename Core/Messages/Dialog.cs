@@ -43,10 +43,11 @@ namespace VKDesktop.Core.Messages
         {
             get
             {
-                return (messages.First(x => x.Unread) != null);
+                return (messages.Any(x=> x.Unread && !x.Mine));
             }
         }
-        public bool MarkingAsRead
+        
+        public bool IsMarkingAsRead
         {
             get;
             set;
@@ -58,10 +59,16 @@ namespace VKDesktop.Core.Messages
             messages = new ObservableCollection<Message>(Memory.GetMesages(user_id));
         }
 
+        
+        private bool isLoading;
+        public bool IsLoading
+        {
+            get { return isLoading; }
+            set { isLoading = value; OnPropertyChanged("IsLoading"); }
+        }
         public async Task LoadMore()
         {
-
-            //but.Content = "Берём таск";
+            IsLoading = true;
             Task<List<Message>> getMoreMessagesTask = Api.Request.GetMessages(user.id,messages.Count,"");
 
             //but.Content = "Взяли таск";
@@ -71,21 +78,31 @@ namespace VKDesktop.Core.Messages
             {
                 this.messages.Insert(0,message);
             }
-            //but.Content = "Таск ответил";
+            System.Threading.Thread.Sleep(200);
+            IsLoading = false;
             
         }
         public async Task MarkAsRead()
         {
-            MarkingAsRead = true;
+            IsMarkingAsRead = true;
             Task<int> getMarkAsReadTask = Api.Request.MarkAsRead(user.id);
             bool isMarked = (await getMarkAsReadTask == 1 ? true : false);
-            MarkingAsRead = false;
+            IsMarkingAsRead = false;
         }
         
         public void ShowTypping()
         {
             if (IsOpened)
                 Window.ShowTypping();
+            else
+            {
+                Notificator.ShowTyppingPopup(user);
+            }
+        }
+        public void StopTypping()
+        {
+            if (IsOpened)
+                Window.HideTypping();
         }
         public void SendTypping()
         {
@@ -94,7 +111,8 @@ namespace VKDesktop.Core.Messages
             // https://vk.com/dev/messages.setActivity
         }
         public void NewMessage(Message message)
-        {   
+        {
+            StopTypping();
             messages.Add(message);
             OnPropertyChanged("Last");
             ScrollDown();

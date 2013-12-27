@@ -101,7 +101,14 @@ namespace VKDesktop.Core.Messages
             await LongPoll.GetNewServer();
             while (true)
             {
-                await StartNew();
+                try
+                {
+                    await StartNew();
+                }
+                catch (Exception exp)
+                {
+                    string s = exp.Message;
+                }
             }
         }
         private static async Task StartNew()
@@ -152,7 +159,6 @@ namespace VKDesktop.Core.Messages
                     case 9:
                         {
                             int user_id = -Convert.ToInt32(update[1]);
-
                             Memory.ShowOffline(user_id);
                         }
                         //9,-$user_id,$flags -- друг $user_id стал оффлайн ($flags равен 0, если пользователь покинул сайт (например, нажал выход) и 1, если оффлайн по таймауту (например, статус away))

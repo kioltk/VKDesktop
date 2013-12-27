@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -78,9 +79,10 @@ namespace VKDesktop
 
             await CurrentDialog.LoadMore();
         }
+        
         private async void MarkAsRead()
         {
-            if (CurrentDialog.HasUnread && !CurrentDialog.MarkingAsRead)
+            if (CurrentDialog.HasUnread && !CurrentDialog.IsMarkingAsRead)
             {
                await CurrentDialog.MarkAsRead();
             }
@@ -111,6 +113,7 @@ namespace VKDesktop
         public void ShowTypping()
         {
             UserStatus.Visibility = System.Windows.Visibility.Visible;
+            UserStatus.Text = CurrentDialog.User.FirstName + " набирает сообщение . . .";
             var hidingAnimation = new DoubleAnimation
             {
                 From = 1.0,
@@ -128,6 +131,10 @@ namespace VKDesktop
             storyboard.Completed += delegate { UserStatus.Visibility = System.Windows.Visibility.Hidden; };
             storyboard.Begin();
         }
+        public void HideTypping()
+        {
+            UserStatus.Visibility = System.Windows.Visibility.Collapsed;
+        }
         public void ShowLastSeen()
         {
             UserStatus.Visibility = System.Windows.Visibility.Visible;
@@ -138,6 +145,19 @@ namespace VKDesktop
 
             UserStatus.Visibility = System.Windows.Visibility.Collapsed;
             UserStatus.Text = CurrentDialog.User.FirstName + " набирает сообщение . . .";
+        }
+
+        private async void DialogsList_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+        {
+            ScrollBar sb = e.OriginalSource as ScrollBar;
+
+            
+
+            if (sb.Value == sb.Minimum)
+            { 
+                if(!CurrentDialog.IsLoading)
+                    await CurrentDialog.LoadMore();
+            }
         }
         
         

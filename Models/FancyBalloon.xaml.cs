@@ -147,12 +147,12 @@ namespace VKDesktop.Models
         /// <summary>
         /// Description
         /// </summary>
-        public static readonly DependencyProperty BalloonTextProperty =
+       /* public static readonly DependencyProperty BalloonTextProperty =
             DependencyProperty.Register("BalloonText",
                                         typeof(string),
                                         typeof(MessagePopup),
                                         new FrameworkPropertyMetadata(""));
-
+        */
         /// <summary>
         /// A property wrapper for the <see cref="BalloonTextProperty"/>
         /// dependency property:<br/>
@@ -162,7 +162,6 @@ namespace VKDesktop.Models
         public string BalloonText
         {
             get { return message.Body; }
-            set { SetValue(BalloonTextProperty, value); }
         }
         public string BalloonTitle
         {
@@ -181,7 +180,7 @@ namespace VKDesktop.Models
         #endregion
 
         TaskbarIcon taskbarIcon;
-        public MessagePopup()
+        private MessagePopup()
         {
             InitializeComponent();
             TaskbarIcon.AddBalloonClosingHandler(this, OnBalloonClosing);
@@ -282,7 +281,7 @@ namespace VKDesktop.Models
 
         private void grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Memory.GetDialog(message.user_id).Open();
+            message.User.Dialog.Open();
             Close();
         }
     }

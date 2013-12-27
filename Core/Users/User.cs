@@ -92,27 +92,35 @@ namespace VKDesktop.Core.Users
         {
             get
             {
-                if(!Online)
-                    return (IsWoman ? "Была" : "Был" ) + " тут " + Helpers.Time.FromEpoch(last_seen.time) + (last_seen.platform!=7 ? " с мобильного ":"");
+                if (!Online)
+                {
+                    var time = Helpers.Time.FromEpoch(last_seen.time);
+                    if (time.Length < 6)
+                       time = time.Insert(0, "в ");
+                    return (IsWoman ? "Была" : "Был") + " тут " + time +(last_seen.platform != 7 ? " с мобильного " : "");
+                }
                 return "";
             }
         }
-        public bool IsWoman
+        
+            public bool IsWoman
         {
             get
             {
                 return (sex == Sex.Woman ? true : false);
             }
         }
-
-        public void ShowOnline(bool mobile)
+        
+        public void SetOnline(bool mobile)
         {
             _online = 1;
             _online_mobile = (mobile ? 1 : 0);
             last_seen = null;
         }
-        public void ShowOffline()
+        public void SetOffline()
         {
+            _online = 0;
+            
             last_seen = new LastSeen()
             {
                 time = Helpers.Time.EpochNow,
@@ -129,6 +137,7 @@ namespace VKDesktop.Core.Users
         {
         }
 
+        
         public class LastSeen
         {
 

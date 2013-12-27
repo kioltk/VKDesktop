@@ -13,7 +13,7 @@ namespace VKDesktop.Helpers
             get
             {
                 var value = DateTime.UtcNow;
-                TimeSpan span = (value - new DateTime(1970, 1, 1, 0, 0, 0, 0).ToLocalTime());
+                TimeSpan span = (value - new DateTime(1970, 1, 1, 0, 0, 0, 0));
 
                 return (int) span.TotalSeconds;
             }
@@ -21,9 +21,9 @@ namespace VKDesktop.Helpers
 
         public static string FromEpoch(int epoch)
         {
-            var epochStart = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            var epochStart = new DateTime(1970, 1, 1, 0, 0, 0, 0).ToLocalTime();
             var epochConverted = epochStart.AddSeconds(epoch);
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
 
             string fullTime = "";
 

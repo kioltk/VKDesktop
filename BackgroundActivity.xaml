@@ -6,7 +6,7 @@
         AllowsTransparency="True"
         WindowStyle="None"
         ShowInTaskbar="False" 
-        Title="BackgroundActivity" Height="0" Width="0">
+        Title="Вконтакте - фон" Height="0" Width="0">
     <Window.Resources>
         <local:ShowMainCommand
             x:Key="ShowMainCommand" />

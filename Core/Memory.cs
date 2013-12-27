@@ -46,7 +46,17 @@ namespace VKDesktop.Core
 
         public static User GetUser(int user_id)
         {
-            return users.Find(x => x.id == user_id);
+            User user = users.Find(x => x.id == user_id);
+            if (user == null)
+            {
+                user = new User()
+                {
+                    photo_50 = "https://vk.com/images/camera_a.gif",
+                    FirstName = "Загрузка",
+                    last_name = ""
+                };
+            }
+            return user;
         }
         public static Dialog GetDialog(int user_id)
         {
@@ -56,9 +66,11 @@ namespace VKDesktop.Core
         public static void ShowOnline(int user_id,bool mobile) 
         {
             User user = GetUser(user_id);
-            if(user!=null)
-                user.ShowOnline(mobile);
-
+            if (user != null)
+            {
+                user.SetOnline(mobile);
+                Notificator.ShowOnlinePopup(user);
+            }
 
 
         }
@@ -66,16 +78,25 @@ namespace VKDesktop.Core
         {
             User user = GetUser(user_id);
             if (user != null)
-                user.ShowOffline();
+            {
 
+                // уведомление по траку
+                user.SetOffline();
+                Notificator.ShowOnlinePopup(user);
+            }
 
         }
         public static void ShowTypping(int user_id)
         {
-            GetDialog(user_id).ShowTypping();
+            User user = GetUser(user_id);
+            if (user != null)
+            {
+                user.Dialog.ShowTypping();
+            }
         }
         public static void NewMessage(Message message)
         {
+            
             Message maybeExist = messages.Find(x => x.id == message.id);
             if (maybeExist == null)
             {
@@ -129,16 +150,14 @@ namespace VKDesktop.Core
                     return;
                 }
                 else
-                    Notificator.ShowMessagePopup(message);
+                {
+                    Helpers.Flasher.FlashWindow(d.Window, 5);
+                }
             }
             else
             {
                 Notificator.ShowMessagePopup(message);
-                Dialog dialog = d;
-                DialogWindow dialogWindow = new DialogWindow(d);
-                dialogWindow.ShowActivated = false;
-                dialogWindow.Show();
-                //flash
+
             }
             Notificator.PlaySound(Notificator.NotificationSound.Message);
 

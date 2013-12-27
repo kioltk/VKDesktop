@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStartupLocation="CenterOwner"
         Icon="/Resources/icons/favicon.ico"
-        Title="AuthorisationDialog" Height="300" Width="300">
+        Title="Вход" Height="300" Width="300">
     <Grid>
         <WebBrowser Name="authorisationpage"></WebBrowser>
     </Grid>

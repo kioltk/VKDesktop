@@ -91,7 +91,6 @@ namespace VKDesktop
 
         public void ShowBalloon(object sender, RoutedEventArgs e)
         {
-            //ShowCustomBalloon();
         }
 
         

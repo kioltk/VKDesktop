@@ -116,5 +116,15 @@ namespace VKDesktop
                 Core.Account.SetOffline();
             }
         }
+
+        private void pageCanvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void addTextBoxMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

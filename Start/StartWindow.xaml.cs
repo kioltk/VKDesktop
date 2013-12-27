@@ -55,14 +55,14 @@ namespace VKDesktop.Start
             }
             else
             {
-                LoadDialogs();
+                LoadDatA();
             }
             
 
 
         }
 
-        private async void LoadDialogs()
+        private async void LoadDatA()
         {
 
             Start.State = "Подключение...";
@@ -88,7 +88,8 @@ namespace VKDesktop.Start
                 Memory.dialogs.Add(d);
             }
 
-
+            List<User> friendsList = await Api.Request.GetFriends(null, "photo_50,online,last_seen,online_mobile,sex");
+            Memory.users.AddRange(friendsList);
             
             LongPoll.Start();
             //System.Threading.Thread.Sleep(3000);

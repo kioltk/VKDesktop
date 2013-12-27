@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Icon="/Resources/icons/message.ico"
         xmlns:converters="clr-namespace:VKDesktop.Models.Converters"
-        Title="DialogWindow" Height="650" MinWidth="400" Width="300">
+        Title="Диалог" Height="650" MinWidth="400" Width="300">
     <Window.Resources>
         <converters:DateConverter x:Key="dateConverter"/>
         <converters:VisibilityConverter x:Key="visibilityConverter"/>
@@ -13,38 +13,47 @@
     
     <Grid >
         <Grid.RowDefinitions>
-            <RowDefinition Height="70"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="15"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" DataContext="{Binding User}">
+        <Grid Grid.Row="0" >
             <Grid.RowDefinitions>
-                <RowDefinition Height="35"/>
-                <RowDefinition Height="35"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="4"/>
             </Grid.RowDefinitions>
-            <Grid  Grid.Row="0">
+            <Grid DataContext="{Binding User}"  Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="35"/>
+                    <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="*"/>
                     
-                </Grid.ColumnDefinitions>         
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Text="{Binding online}"/>
-                <TextBlock VerticalAlignment="Center" Grid.Column="1" Text="{Binding Name}"/>
+                </Grid.ColumnDefinitions>
+                <Canvas Grid.Column="0" Margin="10" Width="50" Height="50">
+                    <Canvas.Clip>
+                        <GeometryGroup>
+                            <RectangleGeometry RadiusX="4" RadiusY="4" Rect="0,0,50,50" />
+                        </GeometryGroup>
+                    </Canvas.Clip>
+                    <Image Height="50" Width="50" Source="{Binding photo_50}"/>
+                </Canvas>
+                <TextBlock Margin="10" Foreground="#555" FontWeight="SemiBold" FontSize="14" Grid.Column="1" Text="{Binding Name}"/>
                 
             </Grid>
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Click="LoadMore">Загрузить ещё</Button>
-                <Button Grid.Column="1">Отправить</Button>
-            </Grid>
+            <ProgressBar 
+                Grid.Row="1"
+                BorderBrush="#00ffffff" 
+                Foreground="#4e7199" 
+                Background="#00ffffff" 
+                Height="2"
+                VerticalAlignment="Bottom"
+                IsIndeterminate="True"
+                Visibility="{Binding IsLoading, Converter={StaticResource visibilityConverter}}"/>
+            
         </Grid>
-        <ListView Grid.Row="1" Name="DialogsList" ItemsSource="{Binding Messages}" BorderThickness="0" HorizontalContentAlignment="Center">
+        
+        <ListView ScrollBar.Scroll="DialogsList_Scroll" BorderThickness="0" ScrollViewer.CanContentScroll="False" Grid.Row="1" Name="DialogsList" ItemsSource="{Binding Messages}"  HorizontalContentAlignment="Center">
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Style.Triggers>
@@ -66,11 +75,22 @@
                     <Grid Background="{Binding Unread, Converter={StaticResource unreadMessageColorConverter}}" Width="340">
                         <Grid Margin="5,4">
                             <StackPanel>
-                                <TextBlock FontWeight="SemiBold" Margin="8,0,0,0" Foreground="#2B587A" Text="{Binding Path=Owner.FirstName}"/>
+                                <Grid>
+                                    <TextBlock FontWeight="SemiBold"  Foreground="#2B587A" Text="{Binding Path=Owner.FirstName}"/>
+                                    <TextBlock HorizontalAlignment="Right" Text="{Binding Date, Converter={StaticResource dateConverter}}"/>
+                                    
+                                </Grid>
                                 <Grid>
                                     <TextBlock Margin="5,0,10,00" TextWrapping="WrapWithOverflow" Text="{Binding Body}" HorizontalAlignment="Left"/>
-                                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Text="{Binding Date, Converter={StaticResource dateConverter}}"/>
-                                    <ProgressBar BorderBrush="#00ffffff" Foreground="#4e7199" Background="#00ffffff" Height="2" Margin="2" VerticalAlignment="Bottom"  IsIndeterminate="{Binding sending}" Visibility="{Binding Sending, Converter={StaticResource visibilityConverter}}" />
+                                    <ProgressBar 
+                                        BorderBrush="#00ffffff" 
+                                        Foreground="#4e7199" 
+                                        Background="#00ffffff" 
+                                        Height="2" 
+                                        Margin="2" 
+                                        VerticalAlignment="Bottom"  
+                                        IsIndeterminate="True" 
+                                        Visibility="{Binding Sending, Converter={StaticResource visibilityConverter}}" />
 
                                 </Grid>
                             </StackPanel>
@@ -79,6 +99,26 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        <Path
+              Fill="#FFFFFFFF"
+              Stretch="Fill"
+                Grid.Row="1"
+              VerticalAlignment="Top"
+              Height="2"
+              Data="M26,107 L220.04123,107" SnapsToDevicePixels="True">
+            <Path.Stroke>
+                <LinearGradientBrush
+                  EndPoint="0.973,0.5"
+                  StartPoint="0.005,0.5">
+                    <GradientStop
+                    Color="#00000000"
+                    Offset="1" />
+                    <GradientStop
+                    Color="#4e7199"
+                    Offset="0" />
+                </LinearGradientBrush>
+            </Path.Stroke>
+        </Path>
         <TextBlock Visibility="Collapsed" Name="UserStatus" Grid.Row="2" Margin="15,0,0,0" />
         <TextBox KeyDown="NewMessageKeyUp" MaxWidth="400" Margin="0,5,0,15" Grid.Row="3" MinHeight="50" MaxHeight="100"></TextBox>
     </Grid>

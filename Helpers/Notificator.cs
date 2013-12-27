@@ -13,6 +13,7 @@ using System.Windows;
 using Hardcodet.Wpf.TaskbarNotification;
 using VKDesktop.Models;
 using System.Windows.Controls.Primitives;
+using VKDesktop.Core.Users;
 
 namespace VKDesktop.Helpers
 {
@@ -23,13 +24,21 @@ namespace VKDesktop.Helpers
             PlaySound(NotificationSound.Message);
         }
 
+        public static void ShowOnlinePopup(User user)
+        {
+            OnlinePopup popup = new OnlinePopup(user);
+
+            Tray.ShowCustomBalloon(popup, PopupAnimation.Scroll, null);
+        }
+        public static void ShowTyppingPopup(User user)
+        {
+            TyppingPopup popup = new TyppingPopup(user,4500);
+            Tray.ShowCustomBalloon(popup, PopupAnimation.Fade, null);
+        }
         public static void ShowMessagePopup(Message message) 
         {
-
-            MessagePopup balloon = new MessagePopup();
-
-            //show balloon and close it after 4 seconds
-            Tray.ShowCustomBalloon(balloon, PopupAnimation.Slide, null);
+            MessagePopup popup = new MessagePopup(message);
+            Tray.ShowCustomBalloon(popup, PopupAnimation.Slide, null);
         }
         public static void PlaySound(NotificationSound sound)
         {

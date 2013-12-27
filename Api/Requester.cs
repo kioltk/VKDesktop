@@ -40,7 +40,7 @@ namespace VKDesktop.Api
             Response<User[]> a = JsonConvert.DeserializeObject<Response<User[]>>(responseData);
             return a.response[0];
         }
-        public async static Task<List<Core.Users.User>> GetUsers(int[] user_ids, string fields)
+        public async static Task<List<User>> GetUsers(int[] user_ids, string fields)
         {
             string parameters = "user_ids=";
             foreach (int id in user_ids)
@@ -56,7 +56,22 @@ namespace VKDesktop.Api
             Response<User[]> a = JsonConvert.DeserializeObject<Response<User[]>>(responseData);
             return a.response.ToList();
         }
+        public async static Task<List<User>> GetFriends(int? user_id, string fields)
+        {
+            string parameters = "";
+            if (user_id.HasValue)
+            {
+                parameters = "user_id=" + user_id.Value+"&";
+            }
 
+            parameters += "fields=" + fields;
+            parameters += "&order=hints";
+            var loadingTask = GetLoaderTask("friends.get", parameters);
+
+            string responseData = await loadingTask;
+            Response<ListItems<User>> a = JsonConvert.DeserializeObject<Response<ListItems<User>>>(responseData);
+            return a.response.items;
+        }
         public async static Task<int> SendMessage(int user_id, string messageText)
         {
             var loadingTask = GetLoaderTask("messages.send", "message=" + messageText + "&user_id=" + user_id);
@@ -80,7 +95,7 @@ namespace VKDesktop.Api
             
             string responseData = await loadingTask; // выходит из метода
 
-            Response<Messages> a = JsonConvert.DeserializeObject<Response<Messages>>(responseData);
+            Response<ListItems<Message>> a = JsonConvert.DeserializeObject<Response<ListItems<Message>>>(responseData);
             return a.response.items.ToList();
             
         }
@@ -92,7 +107,7 @@ namespace VKDesktop.Api
 
             string responseData = await loadingTask;
 
-            Response<Messages> a = JsonConvert.DeserializeObject<Response<Messages>>(responseData);
+            Response<ListItems<Message>> a = JsonConvert.DeserializeObject<Response<ListItems<Message>>>(responseData);
             return a.response.items;
 
         }

@@ -5,7 +5,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         WindowStartupLocation="CenterScreen" 
-        Title="StartWindow" Height="315" Width="705">
+        Title="Запуск" Height="315" Width="705">
     <Window.Background>
         <ImageBrush ImageSource="..\Resources\images\vkontakte-full.jpg" />
     </Window.Background>
